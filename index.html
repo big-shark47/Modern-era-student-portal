@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Modern Era IT School - Student Portal</title>
+  <script src="https://cdn.emailjs.com/dist/email.min.js"></script>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: url('https://media.istockphoto.com/id/951078694/photo/programmers-working-in-software-developing-company.jpg?s=612x612&w=0&k=20&c=ccUI9X5VXysmnJ6TF2h0_M2nQo-uZ3gRb3BcDLER5MM=') no-repeat center center/cover;
+      color: #fff;
+    }
+
+    .container {
+      max-width: 500px;
+      margin: 40px auto;
+      padding: 20px;
+      background: rgba(0, 0, 0, 0.7);
+      border-radius: 8px;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 10px;
+      margin-top: 8px;
+      margin-bottom: 16px;
+      border: none;
+      border-radius: 4px;
+    }
+
+    label {
+      font-weight: bold;
+    }
+
+    button {
+      width: 100%;
+      padding: 10px;
+      margin-top: 10px;
+      background-color: #28a745;
+      border: none;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    .link-btn {
+      background: none;
+      color: #0af;
+      text-decoration: underline;
+      border: none;
+      cursor: pointer;
+      display: block;
+      margin-top: 10px;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    h2 {
+      text-align: center;
+    }
+  </style>
+  <script>
+    window.onload = () => {
+      emailjs.init("2VLKx2NoOscIxukzy"); // Replace with your actual EmailJS public key
+    };
+
+    const africanCountries = [
+      "Nigeria", "Ghana", "Kenya", "South Africa", "Egypt", "Ethiopia", "Uganda",
+      "Tanzania", "Algeria", "Morocco", "Cameroon", "Senegal", "Zambia", "Zimbabwe", "Angola",
+      "Rwanda", "Burundi", "Botswana", "Namibia", "Libya"
+    ];
+
+    function populateCountries() {
+      const countrySelect = document.getElementById("country");
+      africanCountries.forEach(c => {
+        const opt = document.createElement("option");
+        opt.value = c;
+        opt.textContent = c;
+        countrySelect.appendChild(opt);
+      });
+    }
+
+    function showPage(id) {
+      document.querySelectorAll(".page").forEach(p => p.classList.add("hidden"));
+      document.getElementById(id).classList.remove("hidden");
+    }
+
+    function signup() {
+      const data = {
+        surname: document.getElementById("surname").value,
+        firstname: document.getElementById("firstname").value,
+        lastname: document.getElementById("lastname").value,
+        hometown: document.getElementById("hometown").value,
+        email: document.getElementById("email").value,
+        password: document.getElementById("password").value,
+        country: document.getElementById("country").value,
+        gender: document.getElementById("gender").value,
+        age: document.getElementById("age").value,
+        program: document.getElementById("program").value
+      };
+
+      const robotCheck = document.getElementById("robot").checked;
+      if (!robotCheck) {
+        alert("Please confirm you're not a robot.");
+        return;
+      }
+
+      // Save to localStorage
+      localStorage.setItem("student", JSON.stringify(data));
+
+      // Send email via EmailJS
+      emailjs.send("03p5q1b", "xtw8s7y", {
+        name: data.firstname + " " + data.lastname,
+        time: new Date().toLocaleString()
+      }).then(() => {
+        alert("Signup successful! Notification sent.");
+        showCredentials();
+      }).catch(err => {
+        console.error("EmailJS error:", err);
+        alert("Signup successful, but notification failed.");
+        showCredentials();
+      });
+    }
+
+    function signin() {
+      const stored = JSON.parse(localStorage.getItem("student"));
+      const email = document.getElementById("login_email").value;
+      const password = document.getElementById("login_password").value;
+
+      if (stored && stored.email === email && stored.password === password) {
+        alert("Sign in successful!");
+        showCredentials();
+      } else {
+        alert("Invalid email or password.");
+      }
+    }
+
+    function showCredentials() {
+      const data = JSON.parse(localStorage.getItem("student"));
+      const area = document.getElementById("credential_display");
+      area.innerHTML = `
+        <h3>Student Credentials</h3>
+        <p><strong>Surname:</strong> ${data.surname}</p>
+        <p><strong>First Name:</strong> ${data.firstname}</p>
+        <p><strong>Last Name:</strong> ${data.lastname}</p>
+        <p><strong>Hometown:</strong> ${data.hometown}</p>
+        <p><strong>Email:</strong> ${data.email}</p>
+        <p><strong>Country:</strong> ${data.country}</p>
+        <p><strong>Gender:</strong> ${data.gender}</p>
+        <p><strong>Age:</strong> ${data.age}</p>
+        <p><strong>Program:</strong> ${data.program}</p>
+      `;
+      showPage("credentials");
+    }
+
+    function printPage() {
+      const data = document.getElementById("credential_display").innerHTML;
+      document.getElementById("preview_content").innerHTML = data;
+      showPage("print");
+    }
+  </script>
+</head>
+
+<body onload="populateCountries(); showPage('signup')">
+
+  <!-- SIGNUP PAGE -->
+  <div class="container page" id="signup">
+    <h2>Modern Era IT School - Sign Up</h2>
+    <label>Surname</label><input id="surname" required>
+    <label>First Name</label><input id="firstname" required>
+    <label>Last Name</label><input id="lastname" required>
+    <label>Hometown</label><input id="hometown" required>
+    <label>Email Address</label><input type="email" id="email" required>
+    <label>Password</label><input type="password" id="password" required>
+    <label>Country</label>
+    <select id="country" required></select>
+    <label>Gender</label>
+    <select id="gender">
+      <option value="Male">Male</option>
+      <option value="Female">Female</option>
+    </select>
+    <label>Age</label><input id="age" type="number" required>
+    <label>Program of Study</label><input id="program" required>
+    <label><input type="checkbox" id="robot"> I'm not a robot</label>
+    <button onclick="signup()">Sign Up</button>
+    <button class="link-btn" onclick="showPage('signin')">Already have an account? Sign In</button>
+  </div>
+
+  <!-- SIGNIN PAGE -->
+  <div class="container page hidden" id="signin">
+    <h2>Modern Era IT School - Sign In</h2>
+    <label>Email</label><input id="login_email" type="email" required>
+    <label>Password</label><input id="login_password" type="password" required>
+    <button onclick="signin()">Sign In</button>
+    <button class="link-btn" onclick="showPage('signup')">Don't have an account? Sign Up</button>
+  </div>
+
+  <!-- CREDENTIALS PAGE -->
+  <div class="container page hidden" id="credentials">
+    <div id="credential_display"></div>
+    <button onclick="showPage('signup')">Log Out</button>
+    <button onclick="printPage()">Print</button>
+  </div>
+
+  <!-- PRINT PREVIEW PAGE -->
+  <div class="container page hidden" id="print">
+    <div id="preview_content"></div>
+    <button onclick="window.print()">Print Now</button>
+    <button onclick="showPage('credentials')">Back</button>
+  </div>
+
+</body>
+</html>
